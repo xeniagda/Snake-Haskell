@@ -27,7 +27,7 @@ start = do
             update vty $ render game
             let sleep =
                     case game of
-                        GameState _ _ _ _ score -> (5/6) ^ (score `quot` 100) / 10
+                        GameState _ _ _ _ score -> 0.9 ** (fromInteger score / 100) / 10
                         _ -> 0.1
             delay sleep
             event <- popTVar events
@@ -35,10 +35,10 @@ start = do
             case event of
                 Just (EvKey KEsc []) -> shutdown vty
                 Just (EvKey (KChar 'c') [MCtrl]) -> shutdown vty
+                Just (EvKey (KChar 'q') []) -> shutdown vty
                 _ -> do
-                    updated <- gameUpdate game event
+                    updated <- makeNewFoods $ gameUpdate game event
                     loop updated
-
     loop gameStart
 
 -- Event handling

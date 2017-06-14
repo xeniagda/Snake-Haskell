@@ -37,6 +37,6 @@ data GameState
     | Dead Score
     deriving (Show, Eq)
 
-gameStart = GameState [Pos 0 0] (Pos 0 1) [] (30, 30) 0
+gameStart = GameState [Pos 0 0, Pos 0 (-1)] (Pos 0 1) [] (30, 30) 0
 
 use_ascii = False

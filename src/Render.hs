@@ -10,7 +10,7 @@ render (GameState snake dir foods (height, width) score) =
     let parts =
             [
             let st = if i == 0
-                    then string (defAttr `withForeColor` (rgbColor 255 128 0)) ":"
+                    then string (defAttr `withForeColor` (rgbColor 255 128 0)) "▪"
                     else char (defAttr `withForeColor` green) $ getCh snake i
             in translate (x+1) (y+2) st
             | (i, Pos y x) <- zipWith (,) [0..] snake
