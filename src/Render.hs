@@ -6,35 +6,43 @@ import Base
 import Graphics.Vty
 
 render :: GameState -> Picture
-render (GameState snake dir foods (height, width) score) =
+render (Playing state settings) =
     let parts =
             [
-            let st = if i == 0
-                    then string (defAttr `withForeColor` (rgbColor 255 128 0)) "▪"
-                    else char (defAttr `withForeColor` green) $ getCh snake i
+                let st = if i == 0
+                        then string (defAttr `withForeColor` (rgbColor 255 128 0)) "▪"
+                        else char (defAttr `withForeColor` green) $ getCh (getCMap settings) (getSnake state) i
             in translate (x+1) (y+2) st
-            | (i, Pos y x) <- zipWith (,) [0..] snake
+            | (i, Pos y x) <- zipWith (,) [0..] $ getSnake state
             ]
-        foods' =
+        foods =
             [
-            let (ch, (r, g, b)) = foodRender fType
-            in translate (x+1) (y+2) $ string (defAttr `withForeColor` (rgbColor r g b)) [ch]
-            | (Pos y x, fType) <- foods
+                let (ch, (r, g, b)) = foodRender $ getType food
+                    [r', g', b'] = map (toInteger . floor . (* getTimeLeft food) . fromIntegral) [r, g, b]
+                    Pos y x = getPos food
+                in translate (x+1) (y+2) $ 
+                    string 
+                        (defAttr 
+                            `withForeColor` (rgbColor r' g' b')
+                        )
+                        [ch]
+            | food <- getFood state
             ]
+        (height, width) = getSize state
         horizLine = string defAttr $ "+" ++ replicate width '-' ++ "+"
         vertLine = vertCat $ replicate height (string defAttr $ "|" ++ replicate width ' ' ++ "|")
         border = translate 0 1 $ horizLine <-> vertLine <-> horizLine
-        score' = string (defAttr `withForeColor` (rgbColor 127 255 0)) $ "Score: " ++ show score
+        score = string (defAttr `withForeColor` (rgbColor 127 255 0)) $ "Score: " ++ show (getScore state)
 
-    in picForLayers $ parts ++ foods' ++ [score', border]
+    in picForLayers $ parts ++ foods ++ [score, border]
 
 
-render (Dead score) =
+render (Dead score settings) =
     picForImage $ vertCat $ map (horizCat . map (\(text, col) -> string (defAttr `withForeColor` col) text)) $ deadLines score
 
-getCh :: Snake -> Int -> Char
-getCh snake 0 = getCh snake 1
-getCh snake i =
+getCh :: String -> Snake -> Int -> Char
+getCh cmap snake 0 = getCh cmap snake 1
+getCh cmap snake i =
     let current = snake !! i
         before = snake !! (i - 1)
         beforeDiff = current `vSub` before
@@ -45,9 +53,6 @@ getCh snake i =
 
         beforeDiff' = getDir beforeDiff
         nextDiff' = fmap getDir nextDiff
-        cmap = if use_ascii 
-                then "|-\\\\//|-|-"
-                else "┃━┓┗┛┏╻╸╹╺"
     in case (beforeDiff', nextDiff') of
         (0, Just 2) -> cmap !! 0
         (2, Just 0) -> cmap !! 0

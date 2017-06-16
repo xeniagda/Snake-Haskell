@@ -27,7 +27,7 @@ start = do
             update vty $ render game
             let sleep =
                     case game of
-                        GameState _ _ _ _ score -> 0.9 ** (fromInteger score / 100) / 10
+                        Playing state settings -> 0.9 ** (fromInteger (getScore state) / 100) / 10
                         _ -> 0.1
             delay sleep
             event <- popTVar events

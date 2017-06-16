@@ -28,15 +28,35 @@ foodRender Blueberry = ('%', (0, 128, 255))
 
 type Snake = [Pos Int]
 type Direction = Pos Int
-type Food = (Pos Int, Foodtype)
+data Food
+    = Food  { getPos :: Pos Int
+            , getType :: Foodtype
+            , getTimeLeft :: Float
+            , getDyingSpeed :: Float
+            }
+    deriving (Show, Eq)
 type GameSize = (Int, Int)
 type Score = Integer
 
-data GameState
-    = GameState Snake Direction [Food] GameSize Score -- Snake 
-    | Dead Score
+data PlayingState
+    = PlayingState  { getSnake :: Snake
+                    , getDirection :: Direction
+                    , getFood :: [Food]
+                    , getSize :: GameSize
+                    , getScore :: Score
+                    }
+    deriving (Show, Eq )
+
+data Settings
+    = Settings  { getCMap :: String }
     deriving (Show, Eq)
 
-gameStart = GameState [Pos 0 0, Pos 0 (-1)] (Pos 0 1) [] (30, 30) 0
+data GameState
+    = Playing PlayingState Settings
+    | Dead Score Settings
+    deriving (Show, Eq)
 
-use_ascii = False
+defaultSettings = Settings { getCMap = "┃━┓┗┛┏╻╸╹╺" }
+gameStart = Playing 
+                (PlayingState { getSnake = [Pos 0 0, Pos 0 (-1)], getDirection = (Pos 0 1), getFood = [], getSize = (30, 30), getScore = 0}) 
+                defaultSettings
