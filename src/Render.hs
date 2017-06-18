@@ -63,7 +63,7 @@ render (Start startState) =
 
 renderSetting :: Setting -> Bool -> Image
 renderSetting StartGameButton active =
-    string (getAttr active) "Start!"
+    string defAttr " " <|> string (getAttr active `withForeColor` green) " === Start === "
 
 renderSetting sett active =
     let val =

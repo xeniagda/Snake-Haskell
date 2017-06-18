@@ -69,11 +69,18 @@ gameUpdate (Start state) (Just k) =
             case k of
                 EvKey KEnter [] -> Playing defaultGame ((makeSettings defaultSettings settings) { getStartState = Just state })
                 _ -> Start state
-        _ -> Start $ state
-                { getSettings = 
-                       take sIdx settings 
-                    ++ [ button { getValue = (sUpdate button) button k } ]
-                    ++ drop (sIdx + 1) settings }
+        _ -> 
+            case k of
+                EvKey KEnter [] -> 
+                    Start $ state
+                        { getCurrentSetting = length settings - 1
+                        }
+                _ -> 
+                    Start $ state
+                        { getSettings = 
+                               take sIdx settings 
+                            ++ [ button { getValue = (sUpdate button) button k } ]
+                            ++ drop (sIdx + 1) settings }
 
 gameUpdate x _ = x
 
@@ -91,7 +98,7 @@ makeNewFoods (Playing state settings) = do
             if collisions == 0
                 then do
                     foodType <- (enumFrom Apple !!) <$> randomRIO (0, length (enumFrom Apple) - 1)
-                    dyingSpeed <- randomRIO (0, (0.3 + (fromIntegral $ getDiff settings) * 0.02)) :: IO Float
+                    dyingSpeed <- randomRIO (0, (0.1 + (fromIntegral $ getDiff settings) * 0.02)) :: IO Float
                     return $
                         Playing
                             ( state
@@ -99,7 +106,7 @@ makeNewFoods (Playing state settings) = do
                                     Food
                                         {getPos = pos, getType = foodType
                                         , getTimeLeft = 1
-                                        , getDyingSpeed = dyingSpeed ^ 3})
+                                        , getDyingSpeed = dyingSpeed ^ 2})
                                     : getFood state
                                 )
                                 }

@@ -162,7 +162,7 @@ updateInt s _ = getValue s
 
 updateBool :: Setting -> Event -> Value
 updateBool setting (EvKey k [])
-    | k `elem` [KLeft, KRight, KEnter] =
+    | k `elem` [KLeft, KRight, KChar ' '] =
         let VBool val = getValue setting
         in VBool $ not val
 
